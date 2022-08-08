@@ -70,4 +70,18 @@ public class ParkingSpotController {
                 .orElseGet(() ->
                     ResponseEntity.status(HttpStatus.NOT_FOUND).body("Parking Spot not found!"));
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Object> updateParkingSpotById(@PathVariable(value = "id") UUID id,
+                                                        @RequestBody @Valid ParkingSpotDto parkingSpotDto) {
+        Optional<ParkingSpotModel> parkingSpotModelOptional = parkingSpotService.findById(id);
+        return parkingSpotModelOptional.
+                <ResponseEntity<Object>>map(parkingSpotModel -> {
+                    BeanUtils.copyProperties(parkingSpotDto, parkingSpotModel);
+                    parkingSpotModel.setId(parkingSpotModelOptional.get().getId());
+                    parkingSpotModel.setRegistrationDate(parkingSpotModelOptional.get().getRegistrationDate());
+                    return ResponseEntity.status(HttpStatus.OK).body(parkingSpotService.save(parkingSpotModel));
+                }).orElseGet(() ->
+                    ResponseEntity.status(HttpStatus.NOT_FOUND).body("Parking Spot not found!"));
+    }
 }
